@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -63,7 +63,8 @@
         }
         .quote-details input {
             width: 150px;
-            padding: 4px;
+            padding: 0px;
+            margin: 3px;
             font-size: 11pt;
             border: none; /* Remove box */
             border-radius: 0;
@@ -86,7 +87,7 @@
             font-size: 11pt;
         }
         .predefined-text p {
-            margin: 5mm 0;
+            margin: 1mm 0;
             font-size: 11pt;
             display: none;
         }
@@ -181,12 +182,24 @@
         .print-button button:hover {
             background-color: #218838;
         }
+        /* .no-pdf{
+            display: none;
+        } */
         @media print {
             body {
                 margin: 0;
             }
             .no-pdf{
                 display: none !important;
+            }
+            textarea{
+                margin: 0px;
+                 border: none !important;
+                box-shadow: none !important;
+                outline: none !important;
+                background: transparent !important;
+                resize: none !important;
+                overflow: visible !important;
             }
             .container {
                 box-shadow: none;
@@ -200,9 +213,23 @@
             .logo img {
                 max-width: 140px;
             }
-            table, th, td {
-                border: 1px solid #000;
+            table{
+                max-width: 100%;
             }
+            table {
+                table-layout: fixed;
+                width: 100%;
+                font-size: 10px; /* Smaller font for more content */
+            }
+            
+            td {
+                padding: 4px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+
             .dynamic-table input {
                 border: none;
                 background: transparent;
@@ -251,7 +278,7 @@
         <div class="quote-details">
             <div>
                 <label for="recipient">To:</label><br>
-                <textarea id="recipient" class="input-field" rows="4" placeholder="Enter recipient's name and address"></textarea>
+                <textarea id="recipient" class="input-field" rows="3" placeholder="Enter recipient's name and address"></textarea>
             </div>
             <div>
                 <p><strong>Quotation No:</strong> <input type="text" id="quote-no" class="input-field" value="163401/NIC/25-26/01"></p>
@@ -265,16 +292,16 @@
         </div>
 
         <div class="predefined-text">
-            <label for="predefined" class="no-pdf">Select Introductory Text:</label><br>
+            <label for="predefined" class="no-pdf">Select Introductory Text:</label>
             <select id="predefined" class="no-pdf" onchange="updateText()">
-                <option value="We thank you for considering us for your insurance needs. Please find below our quotation based on the details shared.">We thank you for considering us for your insurance needs. Please find below our quotation based on the details shared.</option>
+                <option value="This refers to the renewal quotes for the mentioned vehicles.">This refers to the renewal quotes for the mentioned vehicles.</option>
                 <option value="Please find the best competitive quote for the mentioned details.">Please find the best competitive quote for the mentioned details.</option>
                 <option value="We are pleased to offer the following quotation for your vehicles.">We are pleased to offer the following quotation for your vehicles.</option>
                 <option value="This quotation is based on the vehicle details provided.">This quotation is based on the vehicle details provided.</option>
                 <option value="Enclosed are the renewal details for your insurance policies.">Enclosed are the renewal details for your insurance policies.</option>
                 <option value="We present our best rates for the mentioned vehicles.">We present our best rates for the mentioned vehicles.</option>
-                <option value="As per your request, we are pleased to offer the following insurance quotation for your kind consideration.">As per your request, we are pleased to offer the following insurance quotation for your kind consideration.</option>
-                <option value="In continuation to your inquiry, please find the detailed premium quotation below.">In continuation to your inquiry, please find the detailed premium quotation below.</option>
+                <option value="This is our competitive offer for your insurance needs.">This is our competitive offer for your insurance needs.</option>
+                <option value="Please review the quotation for your vehicle renewals.">Please review the quotation for your vehicle renewals.</option>
             </select>
             <input type="text" id="custom-text" class="input-field  no-pdf" placeholder="Edit selected text" oninput="updateCustomText()">
             <p id="text-1" class="selected">Madam/Sir,<br>This refers to the renewal quotes for the mentioned vehicles.</p>
@@ -293,7 +320,7 @@
                 <thead>
                     <tr>
                         <th>Sl.</th>
-                        <th>Vehicle No.</th>
+                        <th id="vehcleNoHeader">Vehicle No.</th>
                         <th>Renewal Policy No.</th>
                         <th>Exp. Date</th>
                         <th>Coverages</th>
@@ -304,14 +331,14 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><input type="text" class="sl-no" value="1" readonly></td>
-                        <td><input type="text" placeholder="Enter vehicle no."></td>
+                        <!-- <td><input type="text" class="sl-no" value="1" readonly></td>
+                        <td><input id="vehicleNo" type="text" placeholder="Enter vehicle no."></td>
                         <td><input type="text" placeholder="Enter policy no."></td>
                         <td><input type="text" placeholder="DD/MM/YYYY"></td>
                         <td><input type="text" placeholder="Enter coverages"></td>
                         <td><input type="number" class="net-premium" placeholder="Enter net premium" oninput="calculateRow(this)"></td>
                         <td><input type="number" class="gst"  placeholder="Enter GST" oninput="calculateGst(this)"></td>
-                        <td><input type="number" class="final-premium" readonly></td>
+                        <td><input type="number" class="final-premium" readonly></td> -->
                     </tr>
                 </tbody>
                 <tfoot>
@@ -329,6 +356,8 @@
                     <option value="1">1: Single Flat Row</option>
                     <option value="2">2: Split Row (18% GST)</option>
                     <option value="3">3: Split Row (12% & 18% GST)</option>
+                    <option value="4">3: Non- Motor Qn.</option>
+                    
                 </select>
                 <button onclick="addRow()">Add Row</button>
                 <button onclick="removeRow()">Remove Row</button>
@@ -484,14 +513,29 @@
             const select = document.getElementById('row-type-select');
             const choice = select.value;
             const table = document.getElementById('quote-table').getElementsByTagName('tbody')[0];
-            const rowCount = Array.from(table.rows).filter(row => !row.classList.contains('split-row') || row.classList.contains('split-row first')).length + 1;
-
+            const rowCount = Array.from(table.rows).filter(row => !row.classList.contains('split-row') || row.classList.contains('split-row first')).length;
+            document.getElementById("vehcleNoHeader").innerText = 'Vehicle No.'
+            
             if (choice === '1') { // Single Flat Row
                 const newRow = table.insertRow();
                 newRow.dataset.gstRate = '0.18';
                 newRow.innerHTML = `
                     <td><input type="text" class="sl-no" value="${rowCount}" readonly></td>
                     <td><input type="text" placeholder="Enter vehicle no."></td>
+                    <td><input type="text" placeholder="Enter policy no."></td>
+                    <td><input type="text" placeholder="DD/MM/YYYY"></td>
+                    <td><input type="text" placeholder="Enter coverages"></td>
+                    <td><input type="number" class="net-premium" placeholder="Enter net premium" oninput="calculateRow(this)"></td>
+                    <td><input type="number" class="gst" placeholder="Enter GST" oninput="calculateGst(this)"></td>
+                    <td><input type="number" class="final-premium" readonly></td>
+                `;
+            }if (choice === '4') { // Non- Motor Qn.
+                const newRow = table.insertRow();
+                document.getElementById("vehcleNoHeader").innerText = 'Type of Policy'
+                newRow.dataset.gstRate = '0.18';
+                newRow.innerHTML = `
+                    <td><input type="text" class="sl-no" value="${rowCount}" readonly></td>
+                    <td><input type="text" placeholder="Enter Policy Type"></td>
                     <td><input type="text" placeholder="Enter policy no."></td>
                     <td><input type="text" placeholder="DD/MM/YYYY"></td>
                     <td><input type="text" placeholder="Enter coverages"></td>
